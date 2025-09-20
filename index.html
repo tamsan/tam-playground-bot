@@ -305,7 +305,7 @@
             </div>
             
             <div class="input-section">
-                <input type="text" class="input-field" id="userInput" placeholder="メッセージを入力..." onkeypress="handleKeyPress(event)">
+                <input type="text" class="input-field" id="userInput" placeholder="メッセージを入力...">
             </div>
         </div>
         
@@ -377,76 +377,63 @@
             chatContainer.scrollTop = chatContainer.scrollHeight;
         }
         
-        async function sendMessage() {
-            const userInput = document.getElementById('userInput').value.trim();
-            const agreed = document.getElementById('agree').checked;
-            
-            if (!userInput) {
-                alert('メッセージを入力してください');
-                return;
-            }
-            
-            if (!agreed) {
-                alert('利用規約に同意してください');
-                return;
-            }
-            
-            // ユーザーメッセージを表示
-            addMessage('user', userInput);
-            
-            // 入力フィールドをクリア
-            document.getElementById('userInput').value = '';
-            
-            // ボタンを無効化
-            document.getElementById('sendBtn').disabled = true;
-            
-            // typing indicatorを表示
-            showTypingIndicator();
-            
-            // デモ用の返答（実際のAPI接続時はコメントアウト）
-            setTimeout(() => {
-                const demoResponses = [
-                    'なるほど、面白いアイデアですね！まずは小さなプロトタイプから始めてみましょう。',
-                    'それは素晴らしい発想です！TAM Playgroundの「さきにつくる」精神で、すぐに実現可能な形を考えてみましょう。',
-                    'いいですね！その課題を解決するために、まず簡単なMVP（最小限の製品）を作ってみませんか？',
-                    'ご要望を理解しました。段階的に実装していけば、確実に実現できます。最初のステップから始めましょう！'
-                ];
-                const randomResponse = demoResponses[Math.floor(Math.random() * demoResponses.length)];
-                addMessage('bot', randomResponse);
-                document.getElementById('sendBtn').disabled = false;
-            }, 1500);
-            
-            // 実際のAPI呼び出し（準備ができたらコメントを外す）
-            try {
-                const response = await fetch(API_ENDPOINT, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        agentId: AGENT_ID,
-                        message: userInput,
-                        sessionId: sessionId,
-                        history: conversationHistory
-                    })
-                });
-                
-                const data = await response.json();
-                addMessage('bot', data.response);
-            } catch (error) {
-                console.error('Error:', error);
-                addMessage('bot', '申し訳ございません。接続エラーが発生しました。もう一度お試しください。');
-            } finally {
-                document.getElementById('sendBtn').disabled = false;
-            }
-        }
-        
-        // Enterキーで送信
-        document.getElementById('userInput').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter' && !document.getElementById('sendBtn').disabled) {
-                sendMessage();
-            }
+async function sendMessage() {
+    const userInput = document.getElementById('userInput').value.trim();
+    
+    if (!userInput) {
+        return; // 何も入力されていない場合は何もしない
+    }
+    
+    // ユーザーメッセージを表示
+    addMessage('user', userInput);
+    
+    // 入力フィールドをクリア
+    document.getElementById('userInput').value = '';
+    
+    // typing indicatorを表示
+    showTypingIndicator();
+    
+    // 実際のAPI呼び出し
+    try {
+        const response = await fetch(API_ENDPOINT, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                message: userInput,
+                sessionId: sessionId
+            })
         });
+        
+        if (response.ok) {
+            const data = await response.json();
+            addMessage('bot', data.response || 'エラーが発生しました');
+        } else {
+            throw new Error('API response not ok');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        // エラー時はデモ用の返答
+        setTimeout(() => {
+            const demoResponses = [
+                'なるほど、面白いアイデアですね！まずは小さなプロトタイプから始めてみましょう。',
+                'それは素晴らしい発想です！TAM Playgroundの「さきにつくる」精神で、すぐに実現可能な形を考えてみましょう。',
+                'いいですね！その課題を解決するために、まず簡単なMVP（最小限の製品）を作ってみませんか？',
+                'ご要望を理解しました。段階的に実装していけば、確実に実現できます。最初のステップから始めましょう！'
+            ];
+            const randomResponse = demoResponses[Math.floor(Math.random() * demoResponses.length)];
+            addMessage('bot', randomResponse);
+        }, 1500);
+    }
+}
+
+// Enterキーで送信
+document.getElementById('userInput').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+        sendMessage();
+    }
+});
     </script>
 </body>
 </html>

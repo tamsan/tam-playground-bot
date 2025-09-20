@@ -317,7 +317,7 @@
     
     <script>
         // AWS Bedrock API設定
-        const API_ENDPOINT = 'YOUR_API_GATEWAY_ENDPOINT';
+        const API_ENDPOINT = 'https://oqktanbf81.execute-api.ap-northeast-1.amazonaws.com/prod/';
         const AGENT_ID = 'CBVGRSYMD0';
         
         let conversationHistory = [];
@@ -417,7 +417,6 @@
             }, 1500);
             
             // 実際のAPI呼び出し（準備ができたらコメントを外す）
-            /*
             try {
                 const response = await fetch(API_ENDPOINT, {
                     method: 'POST',
@@ -440,7 +439,6 @@
             } finally {
                 document.getElementById('sendBtn').disabled = false;
             }
-            */
         }
         
         // Enterキーで送信

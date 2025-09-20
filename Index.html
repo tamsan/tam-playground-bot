@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TAM Playground AI BOT</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 30px;
+            padding: 30px;
+            max-width: 700px;
+            width: 100%;
+            height: 85vh;
+            max-height: 800px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+            flex-shrink: 0;
+        }
+        
+        .header h1 {
+            font-size: 24px;
+            font-weight: 900;
+            color: #2c3e50;
+            letter-spacing: -1px;
+        }
+        
+        .bot-intro {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            gap: 15px;
+            flex-shrink: 0;
+        }
+        
+        .bot-avatar-small {
+            width: 60px;
+            height: 75px;
+            flex-shrink: 0;
+        }
+        
+        .bot-avatar-small img {
+            width: 100%;
+            height: auto;
+        }
+        
+        .intro-bubble {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 10px 15px;
+            position: relative;
+            border: 2px solid #2c3e50;
+            flex: 1;
+        }
+        
+        .intro-bubble::before {
+            content: '';
+            position: absolute;
+            left: -8px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 0;
+            height: 0;
+            border-top: 8px solid transparent;
+            border-bottom: 8px solid transparent;
+            border-right: 8px solid #2c3e50;
+        }
+        
+        .intro-bubble p {
+            color: #2c3e50;
+            font-size: 14px;
+            font-weight: bold;
+            margin: 0;
+        }
+        
+        .categories {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+            margin-bottom: 15px;
+            flex-shrink: 0;
+        }
+        
+        .category-btn {
+            padding: 8px 15px;
+            border: 2px solid #2c3e50;
+            border-radius: 20px;
+            background: white;
+            color: #2c3e50;
+            font-size: 13px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .category-btn:hover {
+            background: #2c3e50;
+            color: white;
+            transform: translateY(-1px);
+        }
+        
+        .category-btn.active {
+            background: #2c3e50;
+            color: white;
+        }
+        
+        .chat-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 15px;
+            margin-bottom: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .chat-container::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .chat-container::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 3px;
+        }
+        
+        .chat-container::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 3px;
+        }
+        
+        .message {
+            padding: 10px 15px;
+            border-radius: 15px;
+            max-width: 80%;
+            word-wrap: break-word;
+            animation: fadeIn 0.3s;
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .user-message {
+            background: #2c3e50;
+            color: white;
+            align-self: flex-end;
+            margin-left: auto;
+        }
+        
+        .bot-message {
+            background: white;
+            color: #2c3e50;
+            border: 1px solid #e0e0e0;
+            align-self: flex-start;
+        }
+        
+        .typing-indicator {
+            display: none;
+            align-self: flex-start;
+            padding: 15px;
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 15px;
+        }
+        
+        .typing-indicator span {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #888;
+            margin: 0 2px;
+            animation: typing 1.4s infinite;
+        }
+        
+        .typing-indicator span:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+        
+        .typing-indicator span:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+        
+        @keyframes typing {
+            0%, 60%, 100% {
+                transform: translateY(0);
+                opacity: 0.7;
+            }
+            30% {
+                transform: translateY(-10px);
+                opacity: 1;
+            }
+        }
+        
+        .input-section {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-shrink: 0;
+        }
+        
+        .input-field {
+            flex: 1;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 25px;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+        
+        .input-field:focus {
+            outline: none;
+            border-color: #2c3e50;
+        }
+        
+        .send-btn {
+            padding: 12px 25px;
+            background: #2c3e50;
+            color: white;
+            border: none;
+            border-radius: 25px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .send-btn:hover:not(:disabled) {
+            background: #1a252f;
+            transform: translateY(-1px);
+        }
+        
+        .send-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .initial-prompt {
+            text-align: center;
+            color: #888;
+            margin-top: 50px;
+            font-size: 14px;
+        }
+        
+        .agreement-section {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin: 10px 0;
+            flex-shrink: 0;
+            font-size: 12px;
+            color: #666;
+        }
+        
+        .agreement-section input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>TAM Playground AI BOT</h1>
+        </div>
+        
+        <div class="bot-intro">
+            <div class="bot-avatar-small">
+                <!-- TAMくん画像 -->
+                <img src="tam-kun.png" alt="TAMくん">
+            </div>
+            <div class="intro-bubble">
+                <p>さきにつくる。<br>相談してみてください！</p>
+            </div>
+        </div>
+        
+        <div class="categories">
+            <button class="category-btn" onclick="selectCategory(this, 'Web/アプリ開発')">Web/アプリ開発</button>
+            <button class="category-btn" onclick="selectCategory(this, 'AI活用')">AI活用</button>
+            <button class="category-btn" onclick="selectCategory(this, 'DXコンサル')">DXコンサル</button>
+            <button class="category-btn" onclick="selectCategory(this, 'デザイン相談')">デザイン相談</button>
+        </div>
+        
+        <div class="chat-container" id="chatContainer">
+            <div class="initial-prompt">
+                カテゴリーを選択するか、直接メッセージを入力してください
+            </div>
+            <div class="typing-indicator" id="typingIndicator">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+        
+        <div class="agreement-section">
+            <input type="checkbox" id="agree" checked>
+            <label for="agree">利用規約に同意して利用する</label>
+        </div>
+        
+        <div class="input-section">
+            <input type="text" class="input-field" id="userInput" placeholder="メッセージを入力...">
+            <button class="send-btn" id="sendBtn" onclick="sendMessage()">
+                送信
+                <span>→</span>
+            </button>
+        </div>
+    </div>
+    
+    <script>
+        // AWS Bedrock API設定
+        const API_ENDPOINT = 'YOUR_API_GATEWAY_ENDPOINT';
+        const AGENT_ID = 'CBVGRSYMD0';
+        
+        let conversationHistory = [];
+        let sessionId = Date.now().toString();
+        
+        function selectCategory(btn, category) {
+            // アクティブ状態を切り替え
+            document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            
+            // チャットに表示
+            addMessage('user', `${category}について相談したいです`);
+            
+            // ボットの返答
+            setTimeout(() => {
+                const responses = {
+                    'Web/アプリ開発': 'Web/アプリ開発のご相談ですね！どのようなサービスやアプリをお考えですか？具体的な機能や対象ユーザーを教えてください。',
+                    'AI活用': 'AI活用のご相談ですね！業務効率化、データ分析、カスタマーサービスなど、どのような用途でAIを活用したいですか？',
+                    'DXコンサル': 'DXのご相談ですね！デジタル化で解決したい課題や、改善したい業務プロセスについて詳しく教えてください。',
+                    'デザイン相談': 'デザインのご相談ですね！UI/UX、ブランディング、Webデザインなど、どのようなデザインをお考えですか？'
+                };
+                addMessage('bot', responses[category]);
+            }, 1000);
+        }
+        
+        function addMessage(sender, text) {
+            const chatContainer = document.getElementById('chatContainer');
+            const initialPrompt = chatContainer.querySelector('.initial-prompt');
+            
+            // 初回メッセージの場合、初期プロンプトを削除
+            if (initialPrompt) {
+                initialPrompt.remove();
+            }
+            
+            // typing indicatorを非表示
+            document.getElementById('typingIndicator').style.display = 'none';
+            
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${sender}-message`;
+            messageDiv.textContent = text;
+            
+            // typing indicatorの前に挿入
+            const typingIndicator = document.getElementById('typingIndicator');
+            chatContainer.insertBefore(messageDiv, typingIndicator);
+            
+            // スクロールを最下部に
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+            
+            // 履歴に追加
+            conversationHistory.push({sender, text});
+        }
+        
+        function showTypingIndicator() {
+            const indicator = document.getElementById('typingIndicator');
+            indicator.style.display = 'block';
+            const chatContainer = document.getElementById('chatContainer');
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+        
+        async function sendMessage() {
+            const userInput = document.getElementById('userInput').value.trim();
+            const agreed = document.getElementById('agree').checked;
+            
+            if (!userInput) {
+                alert('メッセージを入力してください');
+                return;
+            }
+            
+            if (!agreed) {
+                alert('利用規約に同意してください');
+                return;
+            }
+            
+            // ユーザーメッセージを表示
+            addMessage('user', userInput);
+            
+            // 入力フィールドをクリア
+            document.getElementById('userInput').value = '';
+            
+            // ボタンを無効化
+            document.getElementById('sendBtn').disabled = true;
+            
+            // typing indicatorを表示
+            showTypingIndicator();
+            
+            // デモ用の返答
+            setTimeout(() => {
+                const demoResponses = [
+                    'なるほど、面白いアイデアですね！まずは小さなプロトタイプから始めてみましょう。',
+                    'それは素晴らしい発想です！TAM Playgroundの「さきにつくる」精神で、すぐに実現可能な形を考えてみましょう。',
+                    'いいですね！その課題を解決するために、まず簡単なMVP（最小限の製品）を作ってみませんか？',
+                    'ご要望を理解しました。段階的に実装していけば、確実に実現できます。最初のステップから始めましょう！'
+                ];
+                const randomResponse = demoResponses[Math.floor(Math.random() * demoResponses.length)];
+                addMessage('bot', randomResponse);
+                document.getElementById('sendBtn').disabled = false;
+            }, 1500);
+        }
+        
+        // Enterキーで送信
+        document.getElementById('userInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && !document.getElementById('sendBtn').disabled) {
+                sendMessage();
+            }
+        });
+    </script>
+</body>
+</html>

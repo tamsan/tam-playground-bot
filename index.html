@@ -324,24 +324,19 @@
         let sessionId = Date.now().toString();
         
         function selectCategory(btn, category) {
-            // アクティブ状態を切り替え
-            document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            
-            // チャットに表示
-            addMessage('user', `${category}について相談したいです`);
-            
-            // ボットの返答
-            setTimeout(() => {
-                const responses = {
-                    'Web/アプリ開発': 'Web/アプリ開発のご相談ですね！どのようなサービスやアプリをお考えですか？具体的な機能や対象ユーザーを教えてください。',
-                    'AI活用': 'AI活用のご相談ですね！業務効率化、データ分析、カスタマーサービスなど、どのような用途でAIを活用したいですか？',
-                    'DXコンサル': 'DXのご相談ですね！デジタル化で解決したい課題や、改善したい業務プロセスについて詳しく教えてください。',
-                    'デザイン相談': 'デザインのご相談ですね！UI/UX、ブランディング、Webデザインなど、どのようなデザインをお考えですか？'
-                };
-                addMessage('bot', responses[category]);
-            }, 1000);
-        }
+    // アクティブ状態を切り替え
+    document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    
+    // チャットに表示
+    addMessage('user', `${category}について相談したいです`);
+    
+    // typing indicatorを表示
+    showTypingIndicator();
+    
+    // API呼び出し
+    sendMessageToAPI(`${category}について相談したいです`);
+}
         
         function addMessage(sender, text) {
             const chatContainer = document.getElementById('chatContainer');
@@ -377,23 +372,7 @@
             chatContainer.scrollTop = chatContainer.scrollHeight;
         }
         
-async function sendMessage() {
-    const userInput = document.getElementById('userInput').value.trim();
-    
-    if (!userInput) {
-        return; // 何も入力されていない場合は何もしない
-    }
-    
-    // ユーザーメッセージを表示
-    addMessage('user', userInput);
-    
-    // 入力フィールドをクリア
-    document.getElementById('userInput').value = '';
-    
-    // typing indicatorを表示
-    showTypingIndicator();
-    
-    // 実際のAPI呼び出し
+async function sendMessageToAPI(message) {
     try {
         const response = await fetch(API_ENDPOINT, {
             method: 'POST',
@@ -401,7 +380,7 @@ async function sendMessage() {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-                message: userInput,
+                message: message,
                 sessionId: sessionId
             })
         });
@@ -426,6 +405,26 @@ async function sendMessage() {
             addMessage('bot', randomResponse);
         }, 1500);
     }
+}
+
+async function sendMessage() {
+    const userInput = document.getElementById('userInput').value.trim();
+    
+    if (!userInput) {
+        return;
+    }
+    
+    // ユーザーメッセージを表示
+    addMessage('user', userInput);
+    
+    // 入力フィールドをクリア
+    document.getElementById('userInput').value = '';
+    
+    // typing indicatorを表示
+    showTypingIndicator();
+    
+    // API呼び出し
+    sendMessageToAPI(userInput);
 }
 
 // Enterキーで送信

@@ -339,42 +339,31 @@
 }
         
         function addMessage(sender, text) {
-    const chatContainer = document.getElementById('chatContainer');
-    const initialPrompt = chatContainer.querySelector('.initial-prompt');
-    
-    // 初回メッセージの場合、初期プロンプトを削除
-    if (initialPrompt) {
-        initialPrompt.remove();
-    }
-    
-    // typing indicatorを非表示
-    document.getElementById('typingIndicator').style.display = 'none';
-    
-    const messageDiv = document.createElement('div');
-    messageDiv.className = `message ${sender}-message`;
-    
-    // HTMLエスケープ処理と改行変換
-    const escapedText = text
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#039;')
-        .replace(/\n/g, '<br>');
-    
-    // innerHTMLを使用して改行タグを有効化
-    messageDiv.innerHTML = escapedText;
-    
-    // typing indicatorの前に挿入
-    const typingIndicator = document.getElementById('typingIndicator');
-    chatContainer.insertBefore(messageDiv, typingIndicator);
-    
-    // スクロールを最下部に
-    chatContainer.scrollTop = chatContainer.scrollHeight;
-    
-    // 履歴に追加
-    conversationHistory.push({sender, text});
-}
+            const chatContainer = document.getElementById('chatContainer');
+            const initialPrompt = chatContainer.querySelector('.initial-prompt');
+            
+            // 初回メッセージの場合、初期プロンプトを削除
+            if (initialPrompt) {
+                initialPrompt.remove();
+            }
+            
+            // typing indicatorを非表示
+            document.getElementById('typingIndicator').style.display = 'none';
+            
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${sender}-message`;
+            messageDiv.textContent = text;
+            
+            // typing indicatorの前に挿入
+            const typingIndicator = document.getElementById('typingIndicator');
+            chatContainer.insertBefore(messageDiv, typingIndicator);
+            
+            // スクロールを最下部に
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+            
+            // 履歴に追加
+            conversationHistory.push({sender, text});
+        }
         
         function showTypingIndicator() {
             const indicator = document.getElementById('typingIndicator');

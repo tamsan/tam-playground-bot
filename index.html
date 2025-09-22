@@ -339,31 +339,34 @@
 }
         
         function addMessage(sender, text) {
-            const chatContainer = document.getElementById('chatContainer');
-            const initialPrompt = chatContainer.querySelector('.initial-prompt');
-            
-            // 初回メッセージの場合、初期プロンプトを削除
-            if (initialPrompt) {
-                initialPrompt.remove();
-            }
-            
-            // typing indicatorを非表示
-            document.getElementById('typingIndicator').style.display = 'none';
-            
-            const messageDiv = document.createElement('div');
-            messageDiv.className = `message ${sender}-message`;
-            messageDiv.textContent = text;
-            
-            // typing indicatorの前に挿入
-            const typingIndicator = document.getElementById('typingIndicator');
-            chatContainer.insertBefore(messageDiv, typingIndicator);
-            
-            // スクロールを最下部に
-            chatContainer.scrollTop = chatContainer.scrollHeight;
-            
-            // 履歴に追加
-            conversationHistory.push({sender, text});
-        }
+    const chatContainer = document.getElementById('chatContainer');
+    const initialPrompt = chatContainer.querySelector('.initial-prompt');
+    
+    // 初回メッセージの場合、初期プロンプトを削除
+    if (initialPrompt) {
+        initialPrompt.remove();
+    }
+    
+    // typing indicatorを非表示
+    document.getElementById('typingIndicator').style.display = 'none';
+    
+    const messageDiv = document.createElement('div');
+    messageDiv.className = `message ${sender}-message`;
+    
+    // 改行対応：\nを<br>に変換
+    const formattedText = text.replace(/\n/g, '<br>');
+    messageDiv.innerHTML = formattedText;
+    
+    // typing indicatorの前に挿入
+    const typingIndicator = document.getElementById('typingIndicator');
+    chatContainer.insertBefore(messageDiv, typingIndicator);
+    
+    // スクロールを最下部に
+    chatContainer.scrollTop = chatContainer.scrollHeight;
+    
+    // 履歴に追加
+    conversationHistory.push({sender, text});
+}
         
         function showTypingIndicator() {
             const indicator = document.getElementById('typingIndicator');
